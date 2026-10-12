@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Road Rules Rumble: Mississippi Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #DCE0E3;
+  --panel: #FFFFFF;
+  --ink: #16191D;
+  --muted: #55606B;
+  --line: #B7BEC5;
+  --sign: #FFC800;
+  --sign-ink: #16191D;
+  --ok: #0F7A45;
+  --ok-bg: #DDF3E6;
+  --bad: #C8102E;
+  --bad-bg: #FBE1E5;
+  --asphalt: #2B2F35;
+  --head: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15181C; --panel: #22262C; --ink: #F2F4F5; --muted: #A3ADB6; --line: #3C434B;
+    --ok: #4CC38A; --ok-bg: #123324; --bad: #FF6B80; --bad-bg: #3A1620;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15181C; --panel: #22262C; --ink: #F2F4F5; --muted: #A3ADB6; --line: #3C434B;
+  --ok: #4CC38A; --ok-bg: #123324; --bad: #FF6B80; --bad-bg: #3A1620;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+*, *::before, *::after { box-sizing: inherit; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.5; }
+main { max-width: 760px; margin: 0 auto; padding: 20px 16px 56px; }
+h1, h2, h3 { font-family: var(--head); font-weight: 700; line-height: 1.05; margin: 0; letter-spacing: 0.005em; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Start */
+.hero { display: flex; gap: 18px; align-items: center; margin: 12px 0 10px; }
+.hero svg { flex: none; width: 86px; height: 86px; }
+.hero h1 { font-size: clamp(44px, 11vw, 72px); }
+.hero p { margin: 6px 0 0; color: var(--muted); max-width: 46ch; }
+.card { background: var(--panel); border: 2px solid var(--line); border-radius: 14px; padding: 18px; margin-top: 18px; }
+.card h2 { font-size: 28px; margin-bottom: 6px; }
+.row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+label.field { display: flex; flex-direction: column; gap: 4px; font-weight: 600; flex: 1 1 220px; }
+input[type=text] { font: inherit; padding: 10px 12px; border-radius: 10px; border: 2px solid var(--line); background: var(--bg); color: var(--ink); }
+.check { display: flex; gap: 10px; align-items: flex-start; flex: 1 1 260px; }
+.check input { width: 22px; height: 22px; margin-top: 3px; accent-color: var(--ink); }
+.check small, .muted { color: var(--muted); }
+.btn { background: var(--sign); color: var(--sign-ink); border: 2px solid var(--sign-ink); border-bottom-width: 5px; border-radius: 12px; padding: 12px 20px; font-family: var(--head); font-weight: 700; font-size: 24px; letter-spacing: 0.01em; }
+.btn:active { transform: translateY(2px); border-bottom-width: 3px; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); border-bottom-width: 2px; font-size: 20px; padding: 8px 14px; }
+.btn.ghost:hover { border-color: var(--ink); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.cats { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-top: 12px; }
+.cat { text-align: left; background: var(--bg); border: 2px solid var(--line); border-left: 10px solid var(--c); border-radius: 10px; padding: 10px 12px; }
+.cat:hover { border-color: var(--ink); border-left-color: var(--c); }
+.cat b { display: block; font-family: var(--head); font-size: 22px; line-height: 1.1; }
+.cat span { color: var(--muted); font-size: 14px; }
+
+/* Road progress */
+.road { position: relative; height: 40px; background: var(--asphalt); border-radius: 10px; overflow: hidden; border: 2px solid var(--asphalt); }
+.road::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 4px; transform: translateY(-50%);
+  background: repeating-linear-gradient(90deg, #FFC800 0 22px, transparent 22px 40px); opacity: .85; }
+.car { position: absolute; top: 5px; left: 0; width: 46px; height: 26px; transition: transform .6s cubic-bezier(.3,.8,.3,1); }
+@media (prefers-reduced-motion: reduce) { .car { transition: none; } }
+.hud { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; margin: 12px 0 4px; }
+.hud .grow { flex: 1; }
+.stat { font-family: var(--head); font-size: 22px; font-weight: 700; }
+.stat small { font-family: var(--body); font-weight: 500; font-size: 14px; color: var(--muted); margin-right: 4px; }
+.tag { display: inline-block; border-left: 10px solid var(--c); padding-left: 8px; font-weight: 600; }
+.timer { height: 8px; background: var(--line); border-radius: 6px; overflow: hidden; margin: 6px 0 2px; }
+.timer > div { height: 100%; width: 100%; background: var(--ink); }
+.qcard { background: var(--panel); border: 2px solid var(--line); border-radius: 14px; padding: 20px 18px; margin-top: 10px; }
+.qcard h2 { font-size: clamp(26px, 5.4vw, 34px); line-height: 1.12; font-weight: 600; font-family: var(--head); }
+.opts { display: grid; gap: 10px; margin-top: 16px; }
+.opt { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; background: var(--bg); border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.opt:hover:not(:disabled) { border-color: var(--ink); }
+.opt .k { flex: none; width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--ink); display: grid; place-items: center; font-family: var(--head); font-weight: 700; font-size: 17px; }
+.opt.gone { opacity: .35; text-decoration: line-through; }
+.opt.right { background: var(--ok-bg); border-color: var(--ok); }
+.opt.wrong { background: var(--bad-bg); border-color: var(--bad); }
+.opt .note { margin-left: auto; font-weight: 600; font-size: 14px; white-space: nowrap; }
+.opt:disabled { cursor: default; }
+.lifelines { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.fb { margin-top: 16px; border-radius: 12px; padding: 14px 16px; border: 2px solid var(--line); background: var(--bg); }
+.fb.good { border-color: var(--ok); background: var(--ok-bg); }
+.fb.bad { border-color: var(--bad); background: var(--bad-bg); }
+.fb h3 { font-size: 28px; margin-bottom: 4px; }
+.fb p { margin: 6px 0; }
+.fb .btn { margin-top: 10px; }
+.fb:focus { outline: none; }
+
+/* End */
+.big { font-family: var(--head); font-size: clamp(46px, 12vw, 76px); font-weight: 700; line-height: 1; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 16px 0; }
+.stats div { background: var(--bg); border: 2px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.stats b { display: block; font-family: var(--head); font-size: 32px; line-height: 1.1; }
+.code { display: flex; gap: 8px; flex-wrap: wrap; }
+.code input { flex: 1 1 260px; }
+.miss { border-top: 2px solid var(--line); padding: 12px 0; }
+.miss:first-child { border-top: 0; }
+.miss b { font-weight: 600; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<main id="app" aria-live="off"></main>
+
+<script>
+const CATS = {
+  signs: { name: "Signs and signals", color: "#C8102E", hint: "Shapes, colors, and what the lights are really saying" },
+  row:   { name: "Right of way",      color: "#F2B800", hint: "Who goes first (it is not the loudest car)" },
+  speed: { name: "Speed and space",   color: "#8A949E", hint: "Physics, following distance, and tailgaters" },
+  dist:  { name: "Distraction and impairment", color: "#E8710A", hint: "Phones, passengers, sleep, and substances" },
+  wx:    { name: "Weather and emergencies", color: "#1D6FD8", hint: "Rain, floods, blowouts, and deer" },
+  share: { name: "Sharing the road",  color: "#0F7A45", hint: "Bikes, buses, big rigs, and robotaxis" },
+  ms:    { name: "Mississippi licensing and law", color: "#6B3FA0", hint: "Permits, penalties, insurance, and the stuff only Mississippi asks" }
+};
+
+const Q = [
+// SIGNS
+{c:"signs", q:"It is 2 a.m. You are at a stop sign and the road is empty. No cars, not even a raccoon. What is the move?",
+ o:["Roll through. Nobody is watching","Come to a complete stop at the line, look both ways, then go","Slow to about 5 mph and call it a stop","Flash your lights and go"], a:1,
+ w:"Mississippi's manual defines a stop as a complete halt, not a slow roll. 'But there was nobody there' is the classic excuse, and it never works. Also, the one car you did not see exists."},
+{c:"signs", q:"You spot a sideways-pennant shaped sign on the road. In Mississippi's sign shapes chart, that shape means:",
+ o:["Yield ahead","No passing zone ahead","School zone ahead","Railroad crossing ahead"], a:1,
+ w:"The pennant warns of a no passing zone ahead. The rest of the cheat sheet: octagon is stop, downward triangle is yield, pentagon is school, round is railroad. You can ID a sign by shape alone, in fog or from behind."},
+{c:"signs", q:"A storm knocked out the power and the traffic signal at the intersection is completely dark. The manual says to:",
+ o:["Treat it like a green light, but with more drama","Treat it like a yield sign","Stop completely, then proceed with caution and follow the right-of-way rules","Free-for-all. First honk wins"], a:2,
+ w:"A signal with no working lights means stop completely and proceed with caution, yielding right of way like normal. A flashing red light means the same thing: stop completely. A flashing yellow means slow down and use caution."},
+{c:"signs", q:"The light turns yellow as you approach the intersection. According to the manual, you should:",
+ o:["Floor it. Yellow means faster","Slow down and prepare to stop","Honk, then keep going","Speed up only if there are no cops around"], a:1,
+ w:"A solid yellow means the light will soon turn red, so slow down and prepare to stop. 'Floor it' appears in zero driver manuals. Bonus fact: before a right turn on red you must come to a COMPLETE stop. Only yielding is not enough, and it is illegal."},
+{c:"signs", q:"Railroad crossing lights are flashing and the gates are coming down. You cannot see a train. You:",
+ o:["Zigzag around the gates. You are quick","Stop and stay stopped until the gates are raised and the lights stop flashing","Go if you do not hear a horn","Creep up to the gate for a better view"], a:1,
+ w:"Mississippi's manual says to ALWAYS stop when the lights begin to flash, even if you do not see a train, and it is against the law to drive around lowered gates. Never try to 'beat' a train, and watch for a second one behind the first."},
+{c:"signs", q:"Orange diamond-shaped signs usually mean:",
+ o:["Hospital nearby","Work zone or construction ahead","Bike lane ending","Pumpkin spice season has begun"], a:1,
+ w:"Orange is the color for construction and maintenance warnings. The manual's advice for work zones is to slow down, be ready to stop suddenly, and never tailgate. The pumpkin spice option was a trap. Sorry."},
+
+// RIGHT OF WAY
+{c:"row", q:"You and another driver reach a four-way stop at the exact same moment. She is on your right. Who goes?",
+ o:["You, because you are more confident","Her. The driver on your right goes first","Whoever has the louder car","Whoever waves first, then argue about it later"], a:1,
+ w:"Mississippi's manual: the first vehicle to arrive has the right of way. If several arrive at the same time, the vehicle on the right goes first. Do not slam your brakes to 'stop first.' Just yield to the driver on your right."},
+{c:"row", q:"You reach an intersection with no painted crosswalk lines and someone is crossing while scrolling on their phone. You:",
+ o:["Honk until they notice","Speed up to get past before they step further","Stop and yield. Pedestrians have the right of way at intersections whether or not the crosswalk is marked","Do nothing. No paint, no crosswalk"], a:2,
+ w:"The manual says a person crossing within a crosswalk, marked or not, ALWAYS has the right of way, and drivers must keep their vehicle under control and be ready to yield. Unmarked does not mean unprotected."},
+{c:"row", q:"Sirens and flashing red or blue lights are coming up behind you. Per the manual, you:",
+ o:["Speed up so you are out of the way","Pull to the extreme right shoulder until it passes. If you are in an intersection, go through it first, then pull over","Slam the brakes right where you are in the lane","Move left and keep the same speed"], a:1,
+ w:"An ambulance, fire engine, or police car with lights or a siren always has the right of way, on any street, in any traffic situation. Pull over to the extreme right shoulder and wait until it has passed."},
+{c:"row", q:"You are turning left on a solid green light (no arrow) and a car is coming from the other direction. You:",
+ o:["Go first. You were here first","Yield to the oncoming traffic until it is safe","Flash your lights so they yield to you","Turn and hope for the best"], a:1,
+ w:"For left turns, the manual says a solid green light means you must yield to oncoming traffic, the same as a flashing yellow arrow. A green arrow is the one that gives you the protected turn."},
+{c:"row", q:"In a roundabout (traffic circle), who has the right of way in Mississippi?",
+ o:["Cars entering the roundabout","Traffic already in the circle","Whoever is in the bigger vehicle","Whoever looks the angriest"], a:1,
+ w:"Slow down to enter, yield to traffic in the circle, travel counterclockwise, then signal your exit and leave. Entering traffic yields. Every time."},
+{c:"row", q:"You are entering the interstate from an on-ramp. What does the manual say to do?",
+ o:["Stop at the end of the ramp and wait for a hero to let you in","Follow the ramp speed, build up to the speed of traffic in the acceleration lane, then merge","Merge at 40 and trust everyone to adjust","Use the shoulder as a bonus lane"], a:1,
+ w:"Obey the posted ramp speed, then increase your speed in the acceleration lane until you match the interstate traffic. The manual says it is dangerous to merge slower OR faster than the flow of traffic. Signal, check, merge."},
+
+// SPEED AND SPACE
+{c:"speed", q:"You are cruising at 50 mph. Mississippi's manual says to stay at least how far behind the car ahead?",
+ o:["One car length","Two car lengths","Five car lengths","Depends on your vibes"], a:2,
+ w:"The rule of thumb: at least one car length for every 10 mph. So 50 mph means 5 car lengths, and 70 mph on the interstate means 7. In class we also use the 3 to 4 second gap, which scales the same way without counting cars."},
+{c:"speed", q:"A sudden downpour starts. What does the manual tell you to do?",
+ o:["Slow down. The first minutes of rain make the road extra slick","Speed up to get out of the rain faster","Hit the hazards and keep your normal speed","Turn on cruise control to stay steady"], a:0,
+ w:"Rain lifts oil and dirt off the pavement and leaves a dangerously slick film, so slow down as soon as it starts. Posted limits assume ideal conditions, and your headlights go on any time you cannot see clearly 500 feet ahead."},
+{c:"speed", q:"What is the maximum speed limit on a Mississippi interstate for a regular passenger vehicle?",
+ o:["55 mph","65 mph","70 mph","75 mph"], a:2,
+ w:"Interstates top out at 70 mph (and have a 40 mph minimum). Four-lane highways are 65, two-lane highways are 55, and the Natchez Trace is 50. Those maximums are for ideal conditions, so rain, fog, and traffic mean slower."},
+{c:"speed", q:"You double your speed from 30 mph to 60 mph. Your braking distance becomes about:",
+ o:["Twice as long","Four times as long","The same. Brakes are brakes","Three times as long"], a:1,
+ w:"Braking distance grows with the square of your speed, a core idea in Mississippi's state driver ed curriculum. Double the speed means roughly four times the distance. Physics does not care about your vibes."},
+{c:"speed", q:"A car is tailgating you on the interstate. What is the best response?",
+ o:["Brake-check them to teach a lesson","Speed up to get away","Stay calm, hold a steady speed, and let them pass when it is safe","Slow way down to make a point"], a:2,
+ w:"The manual calls tailgating a main cause of interstate collisions. You cannot control their choices, only yours. The right lane is for through travel and the left is for passing, so keep right, hold your speed, and let them go by."},
+{c:"speed", q:"What is the maximum speed for any vehicle in a Mississippi school zone?",
+ o:["15 mph","25 mph","35 mph","45 mph"], a:0,
+ w:"15 mph, per the manual and the school zone sign, during recess and while children are arriving or leaving at opening and closing times. Kids pop out from between parked cars, so slow down before you see the problem."},
+
+// DISTRACTION AND IMPAIRMENT
+{c:"dist", q:"You get a text while driving. What is the best way to handle it?",
+ o:["Quick glance. It is only a second","Read it at a red light. That is basically parked","Set Driving Focus or Do Not Disturb before you start, and reply when you are parked","Reply with one thumb. It is legal if you are fast"], a:2,
+ w:"Mississippi's manual says writing, sending, or reading text messages while driving is not allowed, and that includes email, instant messages, and electronic messages. A red light is not 'parked.' Set Driving Focus before the car moves."},
+{c:"dist", q:"Mississippi's manual says that even two beers can markedly slow your reflexes. If your reaction slows by half a second at 55 mph, how much farther do you travel before stopping?",
+ o:["About 4 feet","About 20 feet","About 44 feet","About 100 feet"], a:2,
+ w:"An extra 44 feet, which the manual says could be the difference between life and death. The manual's rule is simple: if you drink, do not drive, and never let anyone who has been drinking get behind the wheel."},
+{c:"dist", q:"A friend says, 'I have a medical cannabis card, so it is fine to drive.' Under Mississippi law:",
+ o:["Fair. Legal is legal","Impairment is impairment. Driving under the influence of any drug, medical cannabis included, can get you arrested","It only counts if you feel it","Only illegal drugs count"], a:1,
+ w:"The manual says driving under the influence of any drug, including medical cannabis and prescription drugs, impairs your driving and can result in arrest. Smoking medical cannabis inside a vehicle is a violation too. Read your medicine labels."},
+{c:"dist", q:"On a long road trip, how often does the manual say to stop for a break to fight fatigue?",
+ o:["Every 25 miles","About every 100 miles or 2 hours","Every 300 miles","Only when you actually fall asleep"], a:1,
+ w:"Fatigue slows your reaction time and hurts your vision, even when you feel fine. The manual's tips: 7 to 9 hours of sleep, a stop about every 100 miles or 2 hours, and a travel companion if you can. Energy drinks buy you minutes, not safety."},
+{c:"dist", q:"Your friends want you in their live stream from the driver's seat. You:",
+ o:["Smile and wave. It is one clip","Say no, keep your phone away, and tell them to film after you park","Only do it on straight roads","Only do it if you are under the speed limit"], a:1,
+ w:"The manual says reading or posting to a social networking site on a hand-held phone is not allowed while driving, and passengers can be a serious distraction too. Your friends can make content when the car is in park. Your clout will survive. Your car might not."},
+{c:"dist", q:"Which of these counts as a driving distraction?",
+ o:["Texting","Fiddling with the GPS or playlist while moving","Eating a breakfast burrito","All of the above"], a:3,
+ w:"A distraction is anything physical or mental that pulls your attention off driving: eyes off the road, hands off the wheel, or mind off the task. Texting hits all three. Set your GPS and playlist before you shift out of park."},
+
+// WEATHER AND EMERGENCIES
+{c:"wx", q:"What does the Mississippi manual say is the best way to avoid hydroplaning?",
+ o:["Slow down in the rain or when water is pooled on the road","Speed up so the tires skim over the water","Brake hard on every wet road","Turn off your headlights to save the battery"], a:0,
+ w:"Hydroplaning is when your steering tires ride up on pooled water like water skis. The manual's best defense is simply slowing down in the rain and on roads with puddles or pooled water."},
+{c:"wx", q:"Your car starts to skid. What does the manual say to do?",
+ o:["Slam the brakes","Turn the wheel in the direction of the skid, if you can do it without running off the road or hitting something","Press the clutch to regain control","Accelerate to power out of it"], a:1,
+ w:"Steer in the direction of the skid when it is safe. Braking suddenly will make the skid worse, and you should never use the clutch to try to stop one. Most skids come from driving too fast for the weather and road conditions."},
+{c:"wx", q:"You hear a loud bang and the car pulls hard to one side. It is a tire blowout. First move?",
+ o:["Slam the brakes","Do not brake suddenly. Take your foot off the gas, then brake slowly and cautiously","Swerve into the next lane","Crank the wheel hard the opposite way"], a:1,
+ w:"The manual says not to apply the brakes suddenly. Take your foot off the accelerator, then brake slowly and cautiously. If you have plenty of stopping distance, let the vehicle slow down by itself."},
+{c:"wx", q:"You come to a flooded road and the water looks shallow. What do you do?",
+ o:["Drive through slowly","Turn around and find another route","Follow the truck ahead of you","Floor it so you do not stall"], a:1,
+ w:"The manual says not to drive through large bodies of standing water on a road. If you see a flooded roadway, find another way to your destination. You cannot see what the water is hiding."},
+{c:"wx", q:"Thick fog rolls in. Which lights does the manual say to use?",
+ o:["High beams, to see farther","Low beams, day or night","Hazards only","Parking lights"], a:1,
+ w:"Use the lower beam when driving in fog, day or night. High beams reduce visibility in fog, like shining a flashlight into a cloud. Slow down, add following distance, and never drive with only your parking lights on."},
+{c:"wx", q:"Your right tires slip off the pavement onto the shoulder. What does the manual say to do before you return to the road?",
+ o:["Yank the wheel back immediately","Use the brakes lightly before returning to the roadway","Floor it and steer back","Slam the brakes"], a:1,
+ w:"If you run off the pavement, use the brakes lightly before returning to the roadway. Yanking back at speed is how a small mistake turns into a big one."},
+{c:"wx", q:"You are in a fender bender. Nobody is hurt, but the damage looks like it is over $500. In Mississippi, you must:",
+ o:["Nothing. It was just a scratch","Report it to law enforcement, and exchange name, address, license plate, and insurance info with the other driver","Leave a note and drive away","Settle it with cash on the spot"], a:1,
+ w:"Accidents involving injury, death, or apparent property damage over $500 must be reported to law enforcement, whether or not you were at fault. You also have to show proof of insurance, and without it you can be cited even if the crash was not your fault."},
+{c:"wx", q:"On a Mississippi interstate, what number do you dial on a cell phone to reach the Highway Patrol for an actual emergency?",
+ o:["*HP (*47)","411","*55","#77"], a:0,
+ w:"*HP, which is *47, connects you toll free to a Mississippi Highway Patrol dispatcher. Be ready with your highway and mile marker. It is for real emergencies only, so no calling it about your playlist."},
+
+// SHARING THE ROAD
+{c:"share", q:"You are passing a cyclist on a two-lane road. What does Mississippi's manual say?",
+ o:["Squeeze by as close as you can. They are tiny","Leave at least three feet and do not share the lane. Slow down and pass like you would a car","One foot is plenty","Honk first, then pass at full speed"], a:1,
+ w:"Leave a safe distance of at least three feet. If there is oncoming traffic, slow down behind the cyclist and pass when it clears. A bicycle is a vehicle under Mississippi law, so treat it like one, except with a human and zero airbags."},
+{c:"share", q:"A school bus ahead has flashing red lights and its stop sign out, on a two-lane road with traffic in both directions. In Mississippi you:",
+ o:["Pass carefully on the left","Stop at least ten feet back and stay stopped until the lights are off and the stop sign is retracted","Stop only if you are behind the bus","Slow to 10 mph and go past"], a:1,
+ w:"You must stop at least ten feet away, regardless of your direction of travel, and stay stopped until the children have crossed AND the bus has started moving again with its red lights off and stop sign retracted."},
+{c:"share", q:"You are on a four-lane divided highway. A school bus on the other side of the median has its red lights flashing. You:",
+ o:["May continue on your side without stopping","Must stop, always","Stop only if you see kids","Pass the bus on the median"], a:0,
+ w:"That is the one exception. On a divided highway with four or more lanes, traffic going the OPPOSITE direction of the stopped bus may keep going. Traffic going the same direction as the bus still has to stop."},
+{c:"share", q:"A police car with its lights flashing is parked on the shoulder of a four-lane highway. The manual says to:",
+ o:["Do nothing. They are on the shoulder","Merge into the lane away from it if it is safe. If not, slow down and be ready to stop","Speed up to get past quickly","Honk to say hi"], a:1,
+ w:"The manual says to merge away from an emergency vehicle with lights or a siren parked on the side of a four-lane highway if it is safe. If merging is not safe, slow down and prepare to stop. You MUST yield the right of way."},
+{c:"share", q:"You are next to a semi and cannot see the driver's side mirrors. That means:",
+ o:["They see you fine","They cannot see you either","The mirror is just broken","You are safe. Trucks have x-ray mirrors"], a:1,
+ w:"The manual: if you cannot see the side mirrors of the oversized vehicle, the driver cannot see you. A loaded tractor-trailer weighs about 80,000 pounds and takes longer to stop, and passing one takes 3 to 5 seconds longer than passing a car."},
+{c:"share", q:"You see a fluorescent orange and red triangle on the back of a tractor ahead. It means the vehicle is traveling:",
+ o:["Less than 25 mph","Exactly 55 mph","Faster than 65 mph","It is a pizza delivery sign"], a:0,
+ w:"The orange and red triangle marks a slow-moving vehicle such as farm equipment, an animal-drawn vehicle, or construction equipment, traveling less than 25 mph. Use caution and be sure it is safe before you pass, especially on rural roads."},
+{c:"share", q:"A driverless robotaxi is in the next lane. You:",
+ o:["Cut it off to see if it panics","Drive normally and follow the same rules you would around any other vehicle","Assume it will always yield","Tailgate it to study how it works"], a:1,
+ w:"Mississippi's rules apply to everyone on the road, human or not. Do not test it, and do not assume it will cover for your mistakes. Predictable beats experimental every single time."},
+{c:"share", q:"Electric vehicles are very quiet at low speeds. In a parking lot, that means:",
+ o:["Pedestrians may not hear you coming, so go slow and scan","Nothing. EVs are the same as gas cars","Honk constantly","Pedestrians should just look out for you"], a:0,
+ w:"Pedestrians have the right of way, and a quiet car is easy to miss, especially for kids, people wearing headphones, and people who are blind or have low vision. Parking lots are full of surprise humans. Go slow and scan."},
+
+// MISSISSIPPI LICENSING AND LAW
+{c:"ms", q:"How old do you have to be to apply for a Mississippi learner's permit?",
+ o:["14","15","16","17"], a:1,
+ w:"15. A regular learner's permit is valid for two years, and you need to pass the knowledge exam and the vision exam to get it."},
+{c:"ms", q:"Who has to be in the front passenger seat while you drive on a learner's permit?",
+ o:["Any friend who is not scared","A licensed driver who is 21 or older","Any licensed driver, even a 16-year-old","Nobody, as long as it is before sunset"], a:1,
+ w:"A licensed driver age 21 or older has to be in the seat next to you. A licensed parent sitting in the back seat does not count, and neither does 'I was just driving around the block.'"},
+{c:"ms", q:"Starting July 1, 2027, who has to complete a certified driver's ed course to get a first Mississippi license?",
+ o:["Only people under 16","Every first-time applicant, regardless of age","Only people under 18","Only hardship license applicants"], a:1,
+ w:"Every first-time applicant, teen or adult. Hardship licenses already require it now, and as of July 1, 2026 the course has to come from a DPS-certified or MDE-certified instructor."},
+{c:"ms", q:"What is Mississippi's legal BAC limit for drivers under 21?",
+ o:["0.08","0.05","0.02","0.10"], a:2,
+ w:"0.02, which is roughly one drink for most people. Mississippi has zero tolerance for underage impaired driving. At 0.08 or higher, even an under-21 driver gets charged with a regular DUI."},
+{c:"ms", q:"What happens if you refuse a breath or chemical test under Mississippi's implied consent law?",
+ o:["Nothing. It is your right","Your license is administratively suspended for 90 days, separate from any DUI charge","Just a warning on the first offense","A small fine only"], a:1,
+ w:"By driving in Mississippi you have already given implied consent to testing when an officer has good reason to suspect impairment. Refusing means an immediate license surrender and a 90-day suspension for the refusal itself."},
+{c:"ms", q:"How long is the license suspension for a FIRST underage (Zero Tolerance) DUI offense?",
+ o:["30 days","90 days","120 days","1 year"], a:2,
+ w:"120 days for a first offense. A second offense within five years is a 1-year suspension, and a third is 2 years or until age 21, whichever is longer."},
+{c:"ms", q:"What is the minimum liability insurance Mississippi requires?",
+ o:["$10,000 per person, $20,000 per accident, $10,000 property","$25,000 per person, $50,000 per accident, $25,000 property","$50,000 per person, $100,000 per accident, $50,000 property","None, if your car is paid off"], a:1,
+ w:"$25,000 for one injured person, $50,000 for two or more, and $25,000 for property damage. Keep your insurance card in the car (a phone copy works). No proof of insurance after a crash can get you cited even when it was not your fault."},
+{c:"ms", q:"Which statement about Mississippi's hardship license is true?",
+ o:["It is available to any adult who needs to drive","It is for ages 15 to 17 only, and no cell phone use at all while driving, not even hands-free","It is available even after a DUI","It allows unsupervised driving anywhere, anytime"], a:1,
+ w:"Hardship licenses are for 15 to 17 year olds only, and they are not available after a DUI. Unsupervised driving is only for approved purposes like school, work, and medical needs, and the no-phone rule is stricter than the rule for regular drivers."},
+{c:"ms", q:"Mississippi's Squatted Vehicle Law makes it illegal to drive a passenger vehicle whose front fenders have been raised how far above the rear fenders?",
+ o:["1 inch","2 inches","4 inches or more","10 inches or more"], a:2,
+ w:"Four or more inches, measured from the ground through the center of the wheel. It is the law that targets the 'squatting on its back tires' look, and it can give an officer a reason to pull you over."},
+{c:"ms", q:"You toss a fast-food bag out of a moving car. Under Mississippi's littering law, who can be held responsible?",
+ o:["Only whoever threw it","The driver, the vehicle's owner, or both","Nobody. It is hard to prove","Only the passengers"], a:1,
+ w:"When solid waste is thrown from a motor vehicle, the operator, the owner, or both can be held in violation. Fines usually run $50 to $250, climb with repeat offenses, and solid waste is fined by weight."}
+];
+
+const LIMIT = 20;
+const $ = s => document.querySelector(s);
+const app = $("#app");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+
+let S = { screen: "start", name: "", clock: true, queue: [], i: 0, score: 0, streak: 0, best: 0, correct: 0, log: [], fifty: 2, skips: 1, label: "", cur: null, timer: null, t0: 0, timeLeft: LIMIT };
+
+const CAR = '<svg class="car" id="car" viewBox="0 0 46 26" aria-hidden="true"><path d="M3 18 L3 12 Q3 10 5 9.5 L14 8 L18 3 Q19 2 21 2 L31 2 Q33 2 34 3.5 L38 8.5 L42 10 Q44 11 44 13 L44 18 Z" fill="#FFC800"/><path d="M19 4.5 L30.5 4.5 L34 9 L16.5 9 Z" fill="#2B2F35"/><circle cx="12" cy="19" r="5" fill="#16191D" stroke="#F2F4F5" stroke-width="1.5"/><circle cx="35" cy="19" r="5" fill="#16191D" stroke="#F2F4F5" stroke-width="1.5"/></svg>';
+
+function renderStart() {
+  S.screen = "start";
+  const sign = '<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="16" y="16" width="68" height="68" rx="8" transform="rotate(45 50 50)" fill="#FFC800" stroke="#16191D" stroke-width="5"/><path d="M34 62 L34 52 Q34 49 37 48 L45 46 L50 40 L62 40 L67 48 Q69 50 69 53 L69 62 Z" fill="#16191D"/><circle cx="42" cy="63" r="5" fill="#16191D" stroke="#FFC800" stroke-width="2"/><circle cx="62" cy="63" r="5" fill="#16191D" stroke="#FFC800" stroke-width="2"/></svg>';
+  const catBtns = Object.keys(CATS).map(k => {
+    const n = Q.filter(q => q.c === k).length;
+    return `<button class="cat" style="--c:${CATS[k].color}" data-act="cat" data-cat="${k}"><b>${CATS[k].name}</b><span>6-question rounds from a pool of ${n}. ${CATS[k].hint}</span></button>`;
+  }).join("");
+  app.innerHTML = `
+    <div class="hero">${sign}<div><h1>Road Rules Rumble<br><span style="font-size:0.42em;letter-spacing:.04em">MISSISSIPPI EDITION</span></h1><p>Mississippi driver's ed, but make it a game. Every question follows the Mississippi Driver's Manual and Mississippi law. Learn the rules, flex the streak, and find out which answers your brain was confidently wrong about.</p></div></div>
+    <section class="card">
+      <h2>Get in the driver's seat</h2>
+      <div class="row">
+        <label class="field">Your name (goes on your results code)
+          <input type="text" id="name" maxlength="40" autocomplete="name" value="${esc(S.name)}" placeholder="First name and last initial"></label>
+        <label class="check"><input type="checkbox" id="clock" ${S.clock ? "checked" : ""}><span><b>Clock mode</b><br><small>${LIMIT} seconds per question and a speed bonus. Uncheck for chill mode, which is a great choice if you are still learning the material.</small></span></label>
+      </div>
+      <p class="muted" style="margin:12px 0 0">Streaks add bonus points. You get two 50/50 lifelines (the points drop a bit when you use one) and one Detour to skip a question to the end.</p>
+      <div class="actions"><button class="btn" data-act="full">Start full road test (15 questions)</button></div>
+    </section>
+    <section class="card">
+      <h2>Or drill one topic</h2>
+      <p class="muted" style="margin:0">Short round, one skill. Good for the stuff that keeps tripping you up.</p>
+      <div class="cats">${catBtns}</div>
+    </section>`;
+  window.scrollTo(0, 0);
+}
+
+function readSetup() {
+  const n = $("#name"), c = $("#clock");
+  if (n) S.name = n.value.trim();
+  if (c) S.clock = c.checked;
+}
+
+function startGame(list, label) {
+  S.queue = list; S.i = 0; S.score = 0; S.streak = 0; S.best = 0; S.correct = 0; S.log = [];
+  S.fifty = 2; S.skips = 1; S.label = label; S.screen = "play";
+  loadQuestion();
+}
+function buildFull() {
+  let list = [];
+  Object.keys(CATS).forEach(k => list.push(...shuffle(Q.filter(q => q.c === k)).slice(0, 2)));
+  list = list.concat(shuffle(Q.filter(q => !list.includes(q))).slice(0, Math.max(0, 15 - list.length)));
+  return shuffle(list);
+}
+
+function loadQuestion() {
+  const q = S.queue[S.i];
+  S.cur = { q, opts: shuffle(q.o.map((t, k) => ({ t, ok: k === q.a }))), hidden: [], answered: false, picked: null, fiftyUsed: false, ok: false, pts: 0, parts: null, msg: "" };
+  renderQuestion();
+  if (S.clock) startTimer(); else stopTimer();
+}
+
+function stopTimer() { if (S.timer) { clearInterval(S.timer); S.timer = null; } }
+function startTimer() {
+  stopTimer();
+  S.t0 = performance.now(); S.timeLeft = LIMIT;
+  S.timer = setInterval(() => {
+    S.timeLeft = Math.max(0, LIMIT - (performance.now() - S.t0) / 1000);
+    const bar = $("#tbar"), txt = $("#ttxt");
+    if (bar) bar.style.width = (S.timeLeft / LIMIT * 100) + "%";
+    if (txt) txt.textContent = Math.ceil(S.timeLeft) + "s";
+    if (S.timeLeft <= 0) { stopTimer(); answer(-1); }
+  }, 100);
+}
+
+const GOOD = ["Correct. Your future driving instructor is proud.", "Nailed it. No notes.", "Big brain energy. Eyes on the road, though.", "Correct. That one was not even a vibe check, it was knowledge.", "Right answer. Your streak says hi."];
+const BAD = ["Not quite. That is a learning moment, not a personality.", "Oof. Good thing this is a game and not a road test.", "Nope, but now you know. That is the whole point.", "Missed it. Check the explanation, then move on."];
+
+function answer(idx) {
+  const c = S.cur; if (!c || c.answered) return;
+  c.answered = true; c.picked = idx; stopTimer();
+  const ok = idx >= 0 && c.opts[idx].ok;
+  c.ok = ok;
+  if (ok) {
+    S.streak++; S.best = Math.max(S.best, S.streak); S.correct++;
+    const base = c.fiftyUsed ? 60 : 100;
+    const sb = (Math.min(S.streak, 6) - 1) * 10;
+    const tb = S.clock ? Math.round(S.timeLeft / LIMIT * 40) : 0;
+    c.parts = { base, sb, tb }; c.pts = base + sb + tb; c.msg = pick(GOOD);
+  } else {
+    S.streak = 0; c.pts = 0;
+    c.msg = idx === -1 ? "Time is up. Real roads do not pause, but this game does, so read the explanation." : pick(BAD);
+  }
+  S.score += c.pts;
+  S.log.push({ q: c.q, ok, timeout: idx === -1 });
+  renderQuestion(true);
+}
+
+function useFifty() {
+  const c = S.cur; if (c.answered || S.fifty < 1 || c.fiftyUsed) return;
+  const wrong = c.opts.map((o, i) => ({ o, i })).filter(x => !x.o.ok);
+  c.hidden = shuffle(wrong).slice(0, 2).map(x => x.i);
+  c.fiftyUsed = true; S.fifty--;
+  renderQuestion();
+}
+function useSkip() {
+  const c = S.cur; if (c.answered || S.skips < 1 || S.queue.length - S.i < 2) return;
+  S.skips--;
+  S.queue.push(S.queue.splice(S.i, 1)[0]);
+  loadQuestion();
+}
+function nextQ() {
+  S.i++;
+  if (S.i >= S.queue.length) finish(); else loadQuestion();
+}
+
+function renderQuestion(focusFeedback) {
+  const c = S.cur, q = c.q, cat = CATS[q.c];
+  const total = S.queue.length;
+  const prog = (S.i + (c.answered ? 1 : 0)) / total;
+  const letters = ["A", "B", "C", "D"];
+  const opts = c.opts.map((o, i) => {
+    const gone = c.hidden.includes(i);
+    let cls = "opt", note = "";
+    if (gone) cls += " gone";
+    if (c.answered) {
+      if (o.ok) { cls += " right"; note = c.picked === i ? "Correct. Your answer" : "Correct answer"; }
+      else if (c.picked === i) { cls += " wrong"; note = "Your answer"; }
+    }
+    const mark = c.answered && o.ok ? "&#10003;" : (c.answered && c.picked === i ? "&#10007;" : letters[i]);
+    return `<button class="${cls}" data-act="pick" data-i="${i}" ${c.answered || gone ? "disabled" : ""}><span class="k" aria-hidden="true">${mark}</span><span>${esc(o.t)}</span>${note ? `<span class="note">${note}</span>` : ""}</button>`;
+  }).join("");
+
+  let fb = "";
+  if (c.answered) {
+    const last = S.i === total - 1;
+    const detail = c.ok ? `<p class="muted">+${c.pts} points: ${c.parts.base} base${c.parts.sb ? `, ${c.parts.sb} streak bonus` : ""}${c.parts.tb ? `, ${c.parts.tb} speed bonus` : ""}.${c.fiftyUsed ? " (50/50 used, so the base is lower.)" : ""}</p>` : "";
+    fb = `<div class="fb ${c.ok ? "good" : "bad"}" id="fb" tabindex="-1" role="status">
+      <h3>${c.ok ? "Right on" : (c.picked === -1 ? "Time's up" : "Not this time")}</h3>
+      <p><b>${c.msg}</b></p>${detail}
+      <p>${esc(q.w)}</p>
+      <button class="btn" data-act="next">${last ? "See my results" : "Next question"}</button></div>`;
+  }
+
+  const lifelines = c.answered ? "" : `<div class="lifelines">
+      <button class="btn ghost" data-act="fifty" ${S.fifty < 1 || c.fiftyUsed ? "disabled" : ""}>50/50 (${S.fifty} left)</button>
+      <button class="btn ghost" data-act="skip" ${S.skips < 1 || total - S.i < 2 ? "disabled" : ""}>Detour: skip for now (${S.skips} left)</button></div>`;
+
+  const timer = S.clock ? `<div class="timer" aria-hidden="true"><div id="tbar" style="width:${c.answered ? S.timeLeft / LIMIT * 100 : 100}%"></div></div>` : "";
+
+  app.innerHTML = `
+    <div class="road" role="progressbar" aria-label="Round progress" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${S.i + (c.answered ? 1 : 0)}">${CAR}</div>
+    <div class="hud">
+      <span class="stat"><small>Question</small>${Math.min(S.i + 1, total)} of ${total}</span>
+      <span class="stat"><small>Score</small>${S.score}</span>
+      <span class="stat"><small>Streak</small>${S.streak}</span>
+      <span class="grow"></span>
+      ${S.clock ? `<span class="stat" id="ttxt" aria-hidden="true">${c.answered ? Math.ceil(S.timeLeft) : LIMIT}s</span>` : ""}
+    </div>
+    ${timer}
+    <section class="qcard">
+      <span class="tag" style="--c:${cat.color}">${cat.name}</span>
+      <h2 style="margin-top:10px">${esc(q.q)}</h2>
+      <div class="opts">${opts}</div>
+      ${lifelines}
+      ${fb}
+    </section>`;
+  const car = $("#car");
+  if (car) {
+    const w = car.parentElement.clientWidth - 46 - 4;
+    car.style.transform = `translateX(${Math.max(0, w * prog)}px)`;
+  }
+  if (focusFeedback) { const f = $("#fb"); if (f) f.focus({ preventScroll: false }); }
+}
+
+function rankFor(p) {
+  if (p >= 0.9) return ["Full license, certified chill driver", "You know the rules and the reasons behind them. Go forth and use your turn signal."];
+  if (p >= 0.75) return ["Intermediate license", "Solid. A couple of topics need a refresher, and you already know which ones."];
+  if (p >= 0.55) return ["Learner's permit", "You have the basics. Retry your misses and watch that score climb."];
+  return ["Still in the parking lot", "No shame. That is literally what practice is for. Retry the misses below."];
+}
+
+function finish() {
+  stopTimer(); S.screen = "end";
+  const total = S.queue.length, p = S.correct / total;
+  const [title, line] = rankFor(p);
+  const missed = S.log.filter(x => !x.ok);
+  const nm = S.name || "Anonymous";
+  const code = `${nm} | ${S.label} | ${S.correct}/${total} correct | ${S.score} pts | best streak ${S.best} | ${title}`;
+  const missHtml = missed.length
+    ? missed.map(m => `<div class="miss"><b>${esc(m.q.q)}</b><br><span class="muted">Right answer:</span> ${esc(m.q.o[m.q.a])}<br><span class="muted">${esc(m.q.w)}</span></div>`).join("")
+    : `<p><b>Zero misses.</b> Flawless. Please go be a good example on the road.</p>`;
+  app.innerHTML = `
+    <div class="road" aria-hidden="true">${CAR}</div>
+    <section class="card">
+      <p class="muted" style="margin:0">${esc(S.label)}</p>
+      <div class="big">${esc(title)}</div>
+      <p style="margin:8px 0 0">${esc(line)}</p>
+      <div class="stats">
+        <div><b>${S.correct}/${total}</b>correct</div>
+        <div><b>${S.score}</b>points</div>
+        <div><b>${S.best}</b>best streak</div>
+        <div><b>${Math.round(p * 100)}%</b>accuracy</div>
+      </div>
+      <h2 style="font-size:24px">Results code</h2>
+      <p class="muted" style="margin:2px 0 8px">Copy this and paste it into your assignment, or screenshot this page.</p>
+      <div class="code"><input type="text" id="code" readonly value="${esc(code)}" aria-label="Results code"><button class="btn ghost" data-act="copy" id="copybtn">Copy</button></div>
+      <div class="actions">
+        ${missed.length ? `<button class="btn" data-act="retry">Retry my ${missed.length} missed</button>` : ""}
+        <button class="btn ${missed.length ? "ghost" : ""}" data-act="home">Back to start</button>
+      </div>
+    </section>
+    <section class="card"><h2>${missed.length ? "Missed questions" : "Review"}</h2>${missHtml}</section>`;
+  const car = $(".car"); if (car) { const w = car.parentElement.clientWidth - 50; requestAnimationFrame(() => { car.style.transform = `translateX(${w}px)`; }); }
+  window.scrollTo(0, 0);
+}
+
+function copyCode() {
+  const el = $("#code"), b = $("#copybtn");
+  el.focus(); el.select();
+  const done = () => { b.textContent = "Copied"; setTimeout(() => { if (b) b.textContent = "Copy"; }, 1800); };
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(el.value).then(done, () => { try { document.execCommand("copy"); done(); } catch (e) { b.textContent = "Press Ctrl/Cmd+C"; } });
+    else { document.execCommand("copy"); done(); }
+  } catch (e) { b.textContent = "Press Ctrl/Cmd+C"; }
+}
+
+app.addEventListener("click", e => {
+  const t = e.target.closest("[data-act]"); if (!t) return;
+  const act = t.dataset.act;
+  if (act === "full") { readSetup(); startGame(buildFull(), "Full road test"); }
+  else if (act === "cat") { readSetup(); const k = t.dataset.cat; startGame(shuffle(Q.filter(q => q.c === k)).slice(0, 6), CATS[k].name + " round"); }
+  else if (act === "pick") answer(+t.dataset.i);
+  else if (act === "fifty") useFifty();
+  else if (act === "skip") useSkip();
+  else if (act === "next") nextQ();
+  else if (act === "copy") copyCode();
+  else if (act === "retry") { const missedQs = S.log.filter(x => !x.ok).map(x => x.q); startGame(shuffle(missedQs), "Retry round (missed questions)"); }
+  else if (act === "home") renderStart();
+});
+
+document.addEventListener("keydown", e => {
+  if (S.screen !== "play" || !S.cur) return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (!S.cur.answered) {
+    const map = { "1": 0, "2": 1, "3": 2, "4": 3, "a": 0, "b": 1, "c": 2, "d": 3 };
+    if (k in map) {
+      const i = map[k];
+      if (!S.cur.hidden.includes(i)) { e.preventDefault(); answer(i); }
+    }
+  } else if (k === "enter" && document.activeElement && document.activeElement.tagName !== "BUTTON") {
+    e.preventDefault(); nextQ();
+  }
+});
+
+window.addEventListener("resize", () => { if (S.screen === "play" && S.cur) { const car = $("#car"); if (car) { const prog = (S.i + (S.cur.answered ? 1 : 0)) / S.queue.length; car.style.transform = `translateX(${Math.max(0, (car.parentElement.clientWidth - 50) * prog)}px)`; } } });
+
+renderStart();
+</script>
+</body>
+</html>
